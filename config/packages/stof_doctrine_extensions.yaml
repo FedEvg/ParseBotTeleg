@@ -1,0 +1,6 @@
+stof_doctrine_extensions:
+  orm:
+    sluggable: true
+    timestampable: true
+    softdeleteable: true
+    tree: true
