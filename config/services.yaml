@@ -1,18 +1,10 @@
-# This file is the entry point to configure your own services.
-# Files in the packages/ subdirectory configure your dependencies.
-
-# Put parameters here that don't need to change on each machine where the app is deployed
-# https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
 
 services:
-  # default configuration for services in *this* file
   _defaults:
-    autowire: true      # Automatically injects dependencies in your services.
-    autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+    autowire: true
+    autoconfigure: true
 
-  # makes classes in src/ available to be used as services
-  # this creates a service per class whose id is the fully-qualified class name
   App\:
     resource: '../src/'
     exclude:
@@ -20,9 +12,13 @@ services:
       - '../src/Entity/'
       - '../src/Kernel.php'
 
-  Telegram\Bot\Api:
+  App\Telegram\ConfigBot:
     arguments:
       $token: '%env(API_TOKEN_CONFIG_BOT)%'
+
+  App\Telegram\ParseBot:
+    arguments:
+      $token: '%env(API_TOKEN_PARSE_BOT)%'
 
   App\Command\Telegram\:
     resource: '../src/Command/Telegram/*'
@@ -35,8 +31,5 @@ services:
 
   App\Command\Telegram\CommandHandler:
     arguments:
-      $bot: '@Telegram\Bot\Api'  # Передаем бота
+      $configBot: '@App\Telegram\ConfigBot'
       $commands: !tagged_iterator telegram.command
-
-  # add more service definitions when explicit configuration is needed
-  # please note that last definitions always *replace* previous ones

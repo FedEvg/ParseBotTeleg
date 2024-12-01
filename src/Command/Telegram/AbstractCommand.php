@@ -3,13 +3,16 @@
 namespace App\Command\Telegram;
 
 use App\Entity\User;
-use Telegram\Bot\Api;
+use App\Telegram\ConfigBot;
 
 abstract class AbstractCommand implements CommandInterface
 {
 
+    /**
+     * @throws \Exception
+     */
     public function __construct(
-        protected Api $bot,
+        protected ConfigBot $bot,
     )
     {
         if (!$this->bot) {

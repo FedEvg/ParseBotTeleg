@@ -2,8 +2,8 @@
 
 namespace App\Command\Telegram;
 
-use Telegram\Bot\Api;
 use App\Entity\User;
+use App\Telegram\ConfigBot;
 
 class StartCommand extends AbstractCommand
 {
@@ -12,7 +12,7 @@ class StartCommand extends AbstractCommand
     protected string $description = 'Запуск бота.';
 
     public function __construct(
-        Api $bot
+        ConfigBot $bot
     )
     {
         parent::__construct($bot);

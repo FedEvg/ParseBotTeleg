@@ -5,13 +5,13 @@ namespace App\Command\Telegram;
 use App\Entity\User;
 use App\Repository\UserRepository;
 use App\Service\UserService;
+use App\Telegram\ConfigBot;
 use Symfony\Component\Asset\Exception\AssetNotFoundException;
-use Telegram\Bot\Api;
 
 class CommandHandler
 {
     public function __construct(
-        protected Api                   $bot,
+        protected ConfigBot             $configBot,
         protected iterable              $commands,
         private readonly UserRepository $userRepository,
         private readonly UserService    $userService,
@@ -24,10 +24,10 @@ class CommandHandler
         try {
             $this->searchCommand($update, $update["text"]);
         } catch (\Exception $e) {
-            $this->bot->sendMessage([
-                'chat_id' => $update['chat']['id'],
-                'text' => 'Error: ' . $e->getMessage(),
-            ]);
+            $this->configBot->sendChatMessage(
+                $update['chat']['id'],
+                'Error: ' . $e->getMessage()
+            );
         }
     }
 
@@ -36,10 +36,10 @@ class CommandHandler
         try {
             $this->searchCommand($update['message'], $update["data"]);
         } catch (\Exception $e) {
-            $this->bot->sendMessage([
-                'chat_id' => $update['message']['chat']['id'],
-                'text' => 'Error: ' . $e->getMessage(),
-            ]);
+            $this->configBot->sendChatMessage(
+                $update['message']['chat']['id'],
+                'Error: ' . $e->getMessage()
+            );
         }
     }
 

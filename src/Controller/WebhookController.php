@@ -3,21 +3,20 @@
 namespace App\Controller;
 
 use App\Command\Telegram\CommandHandler;
+use App\Telegram\ConfigBot;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use Telegram\Bot\Api;
 use Telegram\Bot\Exceptions\TelegramSDKException;
 
 class WebhookController extends AbstractController
 {
     public function __construct(
         private readonly CommandHandler $commandHandler,
-        private readonly Api            $bot,
+        private readonly ConfigBot      $configBot,
     )
     {
-
         $this->setWebhook();
     }
 
@@ -27,7 +26,7 @@ class WebhookController extends AbstractController
         $webhookUrl = $_ENV['URL_PROXY_SERVER_FOR_WEBHOOK'] . '/webhook';
 
         try {
-            $this->bot->setWebhook([
+            $this->configBot->setWebhook([
                 'url' => $webhookUrl,
                 'allowed_updates' => ['message', 'callback_query'],
             ]);
@@ -41,7 +40,7 @@ class WebhookController extends AbstractController
     public function handleWebhook(Request $request): Response
     {
         try {
-            $webhook = $this->bot->getWebhookUpdate();
+            $webhook = $this->configBot->getWebhookUpdate();
 
             if ($callback = $webhook->get('callback_query')) {
                 $this->commandHandler->handleCommandCallback($callback);
@@ -57,10 +56,6 @@ class WebhookController extends AbstractController
 
             return new Response('No callback or message found', Response::HTTP_BAD_REQUEST);
         } catch (\Throwable $e) {
-            // Логування помилки (рекомендовано)
-            // $this->logger->error('Webhook error: ' . $e->getMessage());
-
-            // Повернення 500 Internal Server Error з повідомленням про помилку
             return new Response('Server error: ' . $e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }

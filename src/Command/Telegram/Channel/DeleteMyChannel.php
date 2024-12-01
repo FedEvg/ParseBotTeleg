@@ -6,8 +6,8 @@ use App\Command\Telegram\AbstractResponseCommand;
 use App\Entity\User;
 use App\Repository\ChannelRepository;
 use App\Service\ChannelService;
+use App\Telegram\ConfigBot;
 use Doctrine\ORM\EntityManagerInterface;
-use Telegram\Bot\Api;
 
 class DeleteMyChannel extends AbstractResponseCommand
 {
@@ -17,7 +17,7 @@ class DeleteMyChannel extends AbstractResponseCommand
     protected string $actionMessage = 'Enter the channel tag, for example: @telegram_channel_test';
 
     public function __construct(
-        Api                                       $bot,
+        ConfigBot                                       $bot,
         protected readonly EntityManagerInterface $entityManager,
         private readonly ChannelService           $channelService,
         private readonly ChannelRepository        $channelRepository,

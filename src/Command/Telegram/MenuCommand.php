@@ -3,7 +3,7 @@
 namespace App\Command\Telegram;
 
 use App\Entity\User;
-use Telegram\Bot\Api;
+use App\Telegram\ConfigBot;
 
 class MenuCommand extends AbstractCommand
 {
@@ -15,7 +15,7 @@ class MenuCommand extends AbstractCommand
      * @throws \Exception
      */
     public function __construct(
-        Api $bot,
+        ConfigBot $bot,
     )
     {
         parent::__construct($bot);

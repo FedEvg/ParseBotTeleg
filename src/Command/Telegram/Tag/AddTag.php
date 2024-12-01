@@ -6,8 +6,8 @@ use App\Command\Telegram\AbstractResponseCommand;
 use App\Entity\User;
 use App\Service\ChannelService;
 use App\Service\TagService;
+use App\Telegram\ConfigBot;
 use Doctrine\ORM\EntityManagerInterface;
-use Telegram\Bot\Api;
 
 class AddTag extends AbstractResponseCommand
 {
@@ -17,7 +17,7 @@ class AddTag extends AbstractResponseCommand
     protected string $actionMessage = 'Введите тег канала и теги через пробел. Пример: @channel #tag1 #tag2';
 
     public function __construct(
-        Api                                       $bot,
+        ConfigBot                                 $bot,
         protected readonly EntityManagerInterface $entityManager,
         private readonly ChannelService           $channelService,
         private readonly TagService               $tagService,

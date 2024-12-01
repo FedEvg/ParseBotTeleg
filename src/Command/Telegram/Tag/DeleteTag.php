@@ -6,8 +6,8 @@ use App\Command\Telegram\AbstractResponseCommand;
 use App\Entity\User;
 use App\Service\ChannelService;
 use App\Service\TagService;
+use App\Telegram\ConfigBot;
 use Doctrine\ORM\EntityManagerInterface;
-use Telegram\Bot\Api;
 
 class DeleteTag extends AbstractResponseCommand
 {
@@ -17,7 +17,7 @@ class DeleteTag extends AbstractResponseCommand
     protected string $actionMessage = 'Введите тег канала и тег для удаления. Пример: @channel #tag';
 
     public function __construct(
-        Api                                       $bot,
+        ConfigBot                                       $bot,
         protected readonly EntityManagerInterface $entityManager,
         private readonly ChannelService           $channelService,
         private readonly TagService               $tagService,

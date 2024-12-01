@@ -5,8 +5,9 @@ namespace App\Command\Telegram\Channel;
 use App\Command\Telegram\AbstractResponseCommand;
 use App\Entity\User;
 use App\Service\ChannelService;
+use App\Telegram\ConfigBot;
+use App\Telegram\ParseBot;
 use Doctrine\ORM\EntityManagerInterface;
-use Telegram\Bot\Api;
 use Telegram\Bot\Exceptions\TelegramResponseException;
 use Telegram\Bot\Exceptions\TelegramSDKException;
 
@@ -18,7 +19,8 @@ class AddMyChannel extends AbstractResponseCommand
     protected string $actionMessage = 'Enter the channel tag, for example: @telegram_channel_test';
 
     public function __construct(
-        Api                                       $bot,
+        ConfigBot                                 $bot,
+        readonly ParseBot                         $parseBot,
         protected readonly EntityManagerInterface $entityManager,
         private readonly ChannelService           $channelService,
         private readonly string                   $newsBotUsername,
@@ -125,8 +127,10 @@ class AddMyChannel extends AbstractResponseCommand
      */
     private function checkNewsBotIsAdmin(object $channelInfo): void
     {
+        xdebug_break();
+
         try {
-            $administrators = $this->bot->getChatAdministrators([
+            $administrators = $this->parseBot->getChatAdministrators([
                 'chat_id' => $channelInfo['id'],
             ]);
 

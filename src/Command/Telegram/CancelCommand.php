@@ -3,8 +3,8 @@
 namespace App\Command\Telegram;
 
 use App\Entity\User;
+use App\Telegram\ConfigBot;
 use Doctrine\ORM\EntityManagerInterface;
-use Telegram\Bot\Api;
 
 class CancelCommand extends AbstractCommand
 {
@@ -14,7 +14,7 @@ class CancelCommand extends AbstractCommand
 
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
-        Api                                     $bot
+        ConfigBot                               $bot
     )
     {
         parent::__construct($bot);
