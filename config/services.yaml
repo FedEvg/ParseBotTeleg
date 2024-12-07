@@ -1,9 +1,16 @@
 parameters:
+  telegram.api_id: '%env(TELEGRAM_API_ID)%'
+  telegram.api_hash: '%env(TELEGRAM_API_HASH)%'
 
 services:
   _defaults:
     autowire: true
     autoconfigure: true
+
+  Doctrine\DBAL\Logging\EchoSQLLogger:
+    public: true
+    tags:
+      - { name: doctrine.dbal.logger, connection: default }
 
   App\:
     resource: '../src/'
@@ -33,3 +40,20 @@ services:
     arguments:
       $configBot: '@App\Telegram\ConfigBot'
       $commands: !tagged_iterator telegram.command
+
+  # Оновлення: правильний клас для MadelineProtoSettings
+  App\Service\MadelineProtoSettings:
+    arguments:
+      $apiId: '%telegram.api_id%'
+      $apiHash: '%telegram.api_hash%'
+
+  App\Service\MadelineProto:
+    factory: [ '@App\Service\MadelineProtoFactory', 'create' ]
+    arguments:
+      - 'session.madeline'
+      - '@App\Service\MadelineProtoSettings'
+
+  App\Service\ParseNewsService:
+    arguments:
+      $madelineProto: '@App\Service\MadelineProto'
+
