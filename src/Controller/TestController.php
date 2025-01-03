@@ -2,7 +2,8 @@
 
 namespace App\Controller;
 
-use App\Service\ParseNewsService;
+use App\Tasks\RedisPostWriter;
+use Exception;
 use JetBrains\PhpStorm\NoReturn;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -13,20 +14,22 @@ class TestController extends AbstractController
 {
 
     public function __construct(
-        private readonly ParseNewsService $newsService,
+        private readonly RedisPostWriter $redisPostWriter
     )
     {
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
-    #[NoReturn] #[Route('/test', name: 'test')]
+    #[NoReturn]
+    #[Route('/test', name: 'test')]
     public function test(Request $request): Response
     {
-        $news = $this->newsService->getLastNews('lossolomas_kyiv', 1);
+        $this->redisPostWriter->savePostToRedis();
 
-        dd($news);
+        return new Response('ALL IS GOOD');
     }
+
 
 }

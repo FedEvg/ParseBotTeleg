@@ -53,7 +53,7 @@ services:
       - 'session.madeline'
       - '@App\Service\MadelineProtoSettings'
 
-  App\Service\ParseNewsService:
+  App\Service\ParsePostService:
     arguments:
       $madelineProto: '@App\Service\MadelineProto'
 

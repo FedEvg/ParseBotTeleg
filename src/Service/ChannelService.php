@@ -6,6 +6,7 @@ use App\Entity\Channel;
 use App\Entity\User;
 use App\Repository\ChannelRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Exception;
 
 readonly class ChannelService
 {
@@ -53,15 +54,25 @@ readonly class ChannelService
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
-    public function getChannelListForTelegram(bool $isOwn = false): array
+    public function getChannel(bool $isOwn = false): array
     {
         $channels = $this->channelRepository->findByIsOwn($isOwn);
 
         if (empty($channels)) {
-            throw new \Exception('Немає доступних каналів.');
+            throw new Exception('Немає доступних каналів.');
         }
+
+        return $channels;
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function getChannelListForTelegram(bool $isOwn = false): array
+    {
+        $channels = $this->getChannel($isOwn);
 
         $data = [];
         foreach ($channels as $index => $channel) {
@@ -71,12 +82,15 @@ readonly class ChannelService
         return $data;
     }
 
+    /**
+     * @throws Exception
+     */
     public function deleteChannelByTag(string $tag): void
     {
         $channel = $this->findByTag($tag);
 
         if (!$channel) {
-            throw new \Exception('Канал не знайдений.');
+            throw new Exception('Канал не знайдений.');
         }
 
         $this->entityManager->remove($channel);
