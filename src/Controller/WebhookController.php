@@ -37,7 +37,7 @@ class WebhookController extends AbstractController
     }
 
     #[Route('/webhook', name: 'webhook')]
-    public function handleWebhook(Request $request): Response
+    public function handleWebhook(): Response
     {
         try {
             $webhook = $this->configBot->getWebhookUpdate();

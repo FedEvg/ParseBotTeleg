@@ -38,8 +38,6 @@ readonly class RedisEventListener
      */
     private function handleHashWrittenEvent(string $key, array $data): void
     {
-        $this->logEvent($key, $data);
-
         if (isset($data[0])) {
             $decodedData = json_decode($data[0], true);
 
@@ -55,7 +53,7 @@ readonly class RedisEventListener
     private function formatMessage(array $decodedData): string
     {
         return sprintf(
-            "Новый пост:\nСообщение: %s\nФото: %d\nВидео: %d\nСсылка: %s\nДата: %s\n",
+            "Новый пост:\nСообщение:\n %s\nФото: %d\nВидео: %d\nСсылка: %s\nДата: %s\n",
             $decodedData['message'],
             $decodedData['photoCount'],
             $decodedData['videoCount'],
@@ -63,22 +61,6 @@ readonly class RedisEventListener
             date('Y-m-d H:i:s', $decodedData['date'])
         );
     }
-
-    private function logEvent(string $key, array $data): void
-    {
-        $logDirectory = __DIR__ . '/../storage/logs'; // Используем относительный путь к папке storage/logs
-
-        if (!is_dir($logDirectory)) {
-            mkdir($logDirectory, 0777, true);
-        }
-
-        $logMessage = "[" . date('Y-m-d H:i:s') . "] Ключ: $key, Данные: " . json_encode($data) . PHP_EOL;
-
-        $logFilePath = $logDirectory . '/redis_events.log';
-
-        file_put_contents($logFilePath, $logMessage, FILE_APPEND);
-    }
-
 
     /**
      * @throws TelegramSDKException

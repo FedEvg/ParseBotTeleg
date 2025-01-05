@@ -6,6 +6,8 @@ use App\Entity\User;
 use App\Repository\UserRepository;
 use App\Service\UserService;
 use App\Telegram\ConfigBot;
+use Exception;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Asset\Exception\AssetNotFoundException;
 
 class CommandHandler
@@ -15,6 +17,7 @@ class CommandHandler
         protected iterable              $commands,
         private readonly UserRepository $userRepository,
         private readonly UserService    $userService,
+        private readonly LoggerInterface $logger,
     )
     {
     }
@@ -23,10 +26,9 @@ class CommandHandler
     {
         try {
             $this->searchCommand($update, $update["text"]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->configBot->sendChatMessage(
-                $update['chat']['id'],
-                'Error: ' . $e->getMessage()
+                $update['chat']['id'], 'Error: ' . $e->getMessage()
             );
         }
     }
@@ -35,25 +37,25 @@ class CommandHandler
     {
         try {
             $this->searchCommand($update['message'], $update["data"]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->configBot->sendChatMessage(
-                $update['message']['chat']['id'],
-                'Error: ' . $e->getMessage()
+                $update['message']['chat']['id'], 'Error: ' . $e->getMessage()
             );
         }
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     private function searchCommand($update, $text): void
     {
-        $command = $this->findCommand($text);
         $userId = $update['from']['id'];
 
         $user = $this->userRepository->findByUserId($userId) ?? $this->createNewUser($update);
 
         $this->checkUserRole($user);
+
+        $command = $this->findCommand($text);
 
         if ($command === null) {
             $waitingMessage = $user->getWaitingForMessage();
@@ -75,7 +77,6 @@ class CommandHandler
 
         $command->handle($update, $user);
     }
-
 
     private function findCommand($text): ?AbstractCommand
     {
@@ -103,12 +104,12 @@ class CommandHandler
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     private function checkUserRole($user): void
     {
         if (!$user->getRoles() || !in_array('ROLE_SUPER_ADMIN', $user->getRoles(), true)) {
-            throw new \Exception('У вас немає прав для цієї дії.');
+            throw new Exception('У вас немає прав для цієї дії.');
         }
     }
 }

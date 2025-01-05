@@ -4,17 +4,22 @@ namespace App\Service;
 
 use Exception;
 use Predis\Client;
+use Psr\Log\LoggerInterface;
 
 class RedisService
 {
     private Client $client;
 
-    public function __construct()
+
+    public function __construct(
+        private readonly LoggerInterface $logger
+    )
     {
         $this->client = new Client([
             'scheme' => 'tcp',
             'host' => 'redis',
             'port' => 6379,
+            'timeout' => 5.0,
         ]);
     }
 
@@ -79,20 +84,48 @@ class RedisService
      */
     public function subscribeToChannels(array $channels, callable $callback): void
     {
-        try {
-            $subscriber = $this->client->pubSubLoop();
+        $maxRetries = 5;
+        $retryDelay = 1;
 
-            foreach ($channels as $channel) {
-                $subscriber->subscribe($channel);
-            }
+        while (true) {
+            try {
+                $subscriber = $this->client->pubSubLoop();
 
-            foreach ($subscriber as $message) {
-                if ($message->kind === 'message') {
-                    $callback($message);
+                foreach ($channels as $channel) {
+                    $subscriber->subscribe($channel);
                 }
+
+                foreach ($subscriber as $message) {
+                    if ($message->kind === 'message') {
+                        $callback($message);
+                    }
+                }
+                break;
+
+            } catch (\Exception $e) {
+                $this->logger->error('Ошибка подключения к Redis: ' . $e->getMessage(), [
+                    'exception' => $e,
+                    'remaining_retries' => $maxRetries,
+                    'retry_delay' => $retryDelay,
+                ]);
+
+                if ($maxRetries <= 0) {
+                    $this->logger->critical('Не удалось подключиться к Redis после нескольких попыток.', [
+                        'exception' => $e,
+                        'max_retries' => $maxRetries,
+                    ]);
+                    throw new Exception('Не удалось подключиться к Redis после нескольких попыток. Error: ' . $e->getMessage());
+                }
+
+                $this->logger->warning("Ошибка подключения, повторная попытка через {$retryDelay} секунд...", [
+                    'remaining_retries' => $maxRetries,
+                    'retry_delay' => $retryDelay,
+                ]);
+
+                sleep($retryDelay);
+                $maxRetries--;
             }
-        } catch (\Exception $e) {
-            throw new Exception("Ошибка при подписке на каналы Redis: " . $e->getMessage());
         }
+
     }
 }
