@@ -20,6 +20,8 @@ class StartCommand extends AbstractCommand
 
     public function handle($message, ?User $user = null): void
     {
+        xdebug_break();
+
         $chatId = $message['chat']['id'];
         $username = $message['chat']['username'];
 

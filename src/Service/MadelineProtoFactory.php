@@ -16,20 +16,6 @@ class MadelineProtoFactory
             $madelineProto = new API($session, $settings->getSettings());
             $madelineProto->start();
 
-            try {
-                $madelineProto->getSelf();
-            } catch (Exception $e) {
-                $phoneNumber = '380966685158';
-                $madelineProto->phoneLogin($phoneNumber);
-
-                $authorization = $madelineProto->completePhoneLogin('Введите код из SMS:');
-
-                if ($authorization['_'] === 'account.password') {
-                    $authorization = $madelineProto->complete2falogin('Введите пароль:');
-                }
-
-            }
-
             return $madelineProto;
         } catch (\Exception $e) {
             throw new Exception("Error init MadelineProto: " . $e->getMessage());

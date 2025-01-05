@@ -15,6 +15,11 @@ class UserService
     {
     }
 
+    /**
+     * @param string $username
+     * @param int $userId
+     * @return User
+     */
     public function createUser(string $username, int $userId): User
     {
         $existingUser = $this->userRepository->findOneBy(['userId' => $userId]);

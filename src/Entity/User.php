@@ -27,9 +27,6 @@ class User implements UserInterface
     #[ORM\Column(type: 'json')]
     private array $roles = [];
 
-    #[ORM\Column(type: 'boolean')]
-    private bool $isWaitingForResponse = false;
-
     #[ORM\Column(type: 'string', nullable: true)]
     private ?string $waitingForMessage = null;
 
@@ -113,18 +110,6 @@ class User implements UserInterface
     public function setWaitingForMessage(?string $waitingForMessage): static
     {
         $this->waitingForMessage = $waitingForMessage;
-
-        return $this;
-    }
-
-    public function isWaitingForResponse(): bool
-    {
-        return $this->isWaitingForResponse;
-    }
-
-    public function setIsWaitingForResponse(bool $isWaitingForResponse): static
-    {
-        $this->isWaitingForResponse = $isWaitingForResponse;
 
         return $this;
     }

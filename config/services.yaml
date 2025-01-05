@@ -27,6 +27,18 @@ services:
     arguments:
       $token: '%env(API_TOKEN_PARSE_BOT)%'
 
+  App\Service\Telegram\ConfigBot:
+    arguments:
+      $token: '%env(API_TOKEN_CONFIG_BOT)%'
+      $domain: '%env(URL_PROXY_SERVER_FOR_WEBHOOK)%'
+    tags: ['app.telegram.bot']
+
+  App\Service\Telegram\ParserBot:
+    arguments:
+      $token: '%env(API_TOKEN_PARSE_BOT)%'
+      $domain: '%env(URL_PROXY_SERVER_FOR_WEBHOOK)%'
+    tags: ['app.telegram.bot']
+
   App\Command\Telegram\:
     resource: '../src/Command/Telegram/*'
     tags: [ 'telegram.command' ]
@@ -39,6 +51,11 @@ services:
   App\Command\Telegram\CommandHandler:
     arguments:
       $configBot: '@App\Telegram\ConfigBot'
+      $commands: !tagged_iterator telegram.command
+
+  App\Service\Telegram\WebhookHandlerServiceFactory:
+    arguments:
+      $bots: !tagged_iterator app.telegram.bot
       $commands: !tagged_iterator telegram.command
 
   # Оновлення: правильний клас для MadelineProtoSettings
