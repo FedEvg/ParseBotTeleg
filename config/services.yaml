@@ -19,46 +19,47 @@ services:
       - '../src/Entity/'
       - '../src/Kernel.php'
 
-  App\Telegram\ConfigBot:
-    arguments:
-      $token: '%env(API_TOKEN_CONFIG_BOT)%'
-
-  App\Telegram\ParseBot:
-    arguments:
-      $token: '%env(API_TOKEN_PARSE_BOT)%'
-
   App\Service\Telegram\ConfigBot:
     arguments:
       $token: '%env(API_TOKEN_CONFIG_BOT)%'
       $domain: '%env(URL_PROXY_SERVER_FOR_WEBHOOK)%'
-    tags: ['app.telegram.bot']
+    tags: [ 'app.telegram.bot' ]
 
   App\Service\Telegram\ParserBot:
     arguments:
-      $token: '%env(API_TOKEN_PARSE_BOT)%'
+      $token: '%env(API_TOKEN_PARSER_BOT)%'
       $domain: '%env(URL_PROXY_SERVER_FOR_WEBHOOK)%'
-    tags: ['app.telegram.bot']
+    tags: [ 'app.telegram.bot' ]
 
-  App\Command\Telegram\:
-    resource: '../src/Command/Telegram/*'
+  start_command.parser:
+    class: App\Service\Telegram\Command\StartCommand
+    arguments:
+      $bot: '@App\Service\Telegram\ParserBot'
     tags: [ 'telegram.command' ]
 
-  App\Command\Telegram\Channel\AddMyChannel:
+  start_command.config:
+    class: App\Service\Telegram\Command\StartCommand
     arguments:
-      $newsBotUsername: '%env(TAG_PARSE_BOT)%'
+      $bot: '@App\Service\Telegram\ConfigBot'
     tags: [ 'telegram.command' ]
 
-  App\Command\Telegram\CommandHandler:
+  cancel_command.parser:
+    class: App\Service\Telegram\Command\CancelCommand
     arguments:
-      $configBot: '@App\Telegram\ConfigBot'
-      $commands: !tagged_iterator telegram.command
+      $bot: '@App\Service\Telegram\ParserBot'
+    tags: [ 'telegram.command' ]
+
+  cancel_command.config:
+    class: App\Service\Telegram\Command\CancelCommand
+    arguments:
+      $bot: '@App\Service\Telegram\ConfigBot'
+    tags: [ 'telegram.command' ]
 
   App\Service\Telegram\WebhookHandlerServiceFactory:
     arguments:
       $bots: !tagged_iterator app.telegram.bot
       $commands: !tagged_iterator telegram.command
 
-  # Оновлення: правильний клас для MadelineProtoSettings
   App\Service\MadelineProtoSettings:
     arguments:
       $apiId: '%telegram.api_id%'
@@ -70,7 +71,7 @@ services:
       - 'session.madeline'
       - '@App\Service\MadelineProtoSettings'
 
+  # Сервис для парсинга
   App\Service\ParsePostService:
     arguments:
       $madelineProto: '@App\Service\MadelineProto'
-

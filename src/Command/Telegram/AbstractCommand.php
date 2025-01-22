@@ -3,25 +3,24 @@
 namespace App\Command\Telegram;
 
 use App\Entity\User;
-use App\Telegram\ConfigBot;
+use App\Service\Telegram\AbstractBot;
+use Exception;
 
 abstract class AbstractCommand implements CommandInterface
 {
-
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     public function __construct(
-        protected ConfigBot $bot,
+        protected AbstractBot $bot,
     )
     {
         if (!$this->bot) {
-            throw new \Exception('Bot object is not injected correctly.');
+            throw new Exception('Bot object is not injected correctly.');
         }
     }
 
     protected string $name;
-
     protected string $command;
     protected string $description;
 

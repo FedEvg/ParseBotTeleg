@@ -2,7 +2,6 @@
 
 namespace App\Service\Telegram;
 
-use App\Repository\UserRepository;
 use App\Service\UserService;
 
 readonly class WebhookHandlerServiceFactory
@@ -19,7 +18,15 @@ readonly class WebhookHandlerServiceFactory
     {
         foreach ($this->bots as $bot) {
             if ($bot instanceof AbstractBot && $bot->getType() === $botType) {
-                return new WebhookHandlerService($bot, $this->commands, $this->userService);
+
+                $commands = [];
+                foreach ($this->commands as $command) {
+                    if ($command->getBot()->getType() === $botType) {
+                        $commands[] = $command;
+                    }
+                }
+
+                return new WebhookHandlerService($bot, $commands, $this->userService);
             }
         }
 

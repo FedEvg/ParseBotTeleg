@@ -2,10 +2,10 @@
 
 namespace App\Service\Telegram;
 
-use App\Command\Telegram\AbstractCommand;
-use App\Command\Telegram\AbstractResponseCommand;
+use App\DTO\Telegram\WebhookDTO;
 use App\Entity\User;
-use App\Repository\UserRepository;
+use App\Service\Telegram\Command\Abstract\AbstractCommand;
+use App\Service\Telegram\Command\Abstract\AbstractInteractiveCommand;
 use App\Service\UserService;
 use Exception;
 use Symfony\Component\Asset\Exception\AssetNotFoundException;
@@ -14,76 +14,57 @@ use Telegram\Bot\Exceptions\TelegramSDKException;
 readonly class WebhookHandlerService
 {
     public function __construct(
-        private AbstractBot    $bot,
-        private iterable       $commands,
-        private UserService    $userService
+        private AbstractBot $bot,
+        private iterable    $commands,
+        private UserService $userService
     )
     {
     }
 
-    /**
-     * @return AbstractBot
-     */
     public function getBot(): AbstractBot
     {
         return $this->bot;
     }
 
-    /**
-     *
-     * @param array $update
-     * @return void
-     * @throws TelegramSDKException
-     */
-    public function handleCommandMessage(array $update): void
-    {
-        $this->handleUpdate($update, $update["text"]);
-    }
 
     /**
-     *
-     * @param array $update
-     * @return void
      * @throws TelegramSDKException
      */
-    public function handleCommandCallback(array $update): void
+    public function handleCommandMessage(WebhookDTO $webhook): void
     {
-        $this->handleUpdate($update['message'], $update["data"]);
+        $this->handleUpdate($webhook);
     }
 
+//    public function handleCommandCallback(WebhookDTO $webhook): void
+//    {
+//        $this->handleUpdate($webhook['message'], $webhook["data"]);
+//    }
+
     /**
-     *
-     * @param array $update
-     * @param string $text
-     * @return void
      * @throws TelegramSDKException
+     * @throws Exception
      */
-    private function handleUpdate(array $update, string $text): void
+    public function handleUpdate(WebhookDTO $webhook): void
     {
         try {
-            $user = $this->getOrCreateUser($update);
+            $user = $this->getOrCreateUser($webhook->getChat()->getId(), $webhook->getChat()->getUserName());
             $this->checkUserRole($user);
 
-            $command = $this->findCommand($text);
+            $command = $this->findCommand($webhook->getText());
 
             if ($command === null) {
-                $this->handleNoCommand($update, $user);
+                $this->handleNoCommand($webhook, $user);
             } else {
-                $command->handle($update, $user);
+                $command->executeCommand($webhook, $user);
             }
         } catch (Exception $e) {
-            $this->handleError($update['chat']['id'], $e);
+            $this->handleError($webhook->getChat()->getId(), $e);
+        } catch (TelegramSDKException $e) {
+            throw new Exception('Помилка відправлення повідомлення в телеграм.');
         }
     }
 
-    /**
-     *
-     * @param array $update
-     * @param User $user
-     * @return void
-     * @throws Exception
-     */
-    private function handleNoCommand(array $update, User $user): void
+    private function handleNoCommand(WebhookDTO $webhook, User $user): void
     {
         $waitingMessage = $user->getWaitingForMessage();
 
@@ -93,22 +74,17 @@ readonly class WebhookHandlerService
 
         $command = $this->findCommand($waitingMessage);
 
-        if ($command instanceof AbstractResponseCommand) {
-            $command->handleResponseMessage($update, $user);
+        if ($command instanceof AbstractInteractiveCommand) {
+            $command->executeInteractiveCommand($webhook, $user);
         } else {
             throw new \LogicException('Команда не підтримує обробку відповіді.');
         }
     }
 
-    /**
-     *
-     * @param string $text
-     * @return AbstractCommand|null
-     */
     private function findCommand(string $text): ?AbstractCommand
     {
         foreach ($this->commands as $command) {
-            if ($command->getCommand() === $text) {
+            if ($command->getName() === $text) {
                 return $command;
             }
         }
@@ -116,20 +92,12 @@ readonly class WebhookHandlerService
         return null;
     }
 
-    /**
-     * @param array $message
-     * @return User
-     */
-    private function getOrCreateUser(array $message): User
+    private function getOrCreateUser(int $userId, string $username): User
     {
-        $userId = $message['from']['id'];
-        return $this->userService->createUser($message['chat']['username'], $userId);
+        return $this->userService->createUser($username, $userId);
     }
 
     /**
-     *
-     * @param User $user
-     * @return void
      * @throws Exception
      */
     private function checkUserRole(User $user): void
@@ -140,10 +108,6 @@ readonly class WebhookHandlerService
     }
 
     /**
-     *
-     * @param int $chatId
-     * @param Exception $e
-     * @return void
      * @throws TelegramSDKException
      */
     private function handleError(int $chatId, Exception $e): void

@@ -4,14 +4,16 @@ namespace App\Service\Telegram;
 
 use AllowDynamicProperties;
 use InvalidArgumentException;
+use Psr\Log\LoggerInterface;
 use Telegram\Bot\Api;
 use Telegram\Bot\Exceptions\TelegramSDKException;
 
 #[AllowDynamicProperties] abstract class AbstractBot extends Api
 {
     public function __construct(
-        protected readonly string $token,
-        private readonly string $domain,
+        protected readonly string        $token,
+        private readonly string          $domain,
+        private readonly LoggerInterface $logger,
     )
     {
         parent::__construct($token);
@@ -67,6 +69,7 @@ use Telegram\Bot\Exceptions\TelegramSDKException;
                 'url' => $this->domain . $url,
                 'allowed_updates' => ['message', 'callback_query'],
             ]);
+            $this->logger->info('Set webhook URL: ' . $this->domain . $url);
         } catch (TelegramSDKException $e) {
             throw new TelegramSDKException("Failed to set webhook: " . $e->getMessage());
         }

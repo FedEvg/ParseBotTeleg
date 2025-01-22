@@ -2,7 +2,7 @@
 
 namespace App\Service;
 
-use App\Telegram\ParseBot;
+use App\Service\Telegram\ParserBot;
 use Exception;
 use Telegram\Bot\Exceptions\TelegramSDKException;
 
@@ -10,7 +10,7 @@ readonly class RedisEventListener
 {
     public function __construct(
         private RedisService $redisService,
-        private ParseBot     $parseBot,
+        private ParserBot  $parserBot,
     )
     {
     }
@@ -67,7 +67,7 @@ readonly class RedisEventListener
      */
     private function sendMessageToUser(string $message): void
     {
-        $this->parseBot->sendMessage([
+        $this->parserBot->sendMessage([
             'chat_id' => 6469279896,
             'text' => $message,
         ]);

@@ -15,7 +15,7 @@ class DefaultCommand extends AbstractCommand
         ConfigBot $bot,
     )
     {
-        parent::__construct($bot); // Передаем $bot в родительский конструктор
+        parent::__construct($bot);
     }
 
     public function handle($message, ?User $user = null): void

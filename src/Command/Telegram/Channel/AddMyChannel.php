@@ -127,8 +127,6 @@ class AddMyChannel extends AbstractResponseCommand
      */
     private function checkNewsBotIsAdmin(object $channelInfo): void
     {
-        xdebug_break();
-
         try {
             $administrators = $this->parseBot->getChatAdministrators([
                 'chat_id' => $channelInfo['id'],
