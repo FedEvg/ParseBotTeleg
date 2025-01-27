@@ -34,7 +34,8 @@
     "symfony/serializer": "7.1.*",
     "symfony/twig-bundle": "7.1.*",
     "symfony/validator": "7.1.*",
-    "symfony/yaml": "7.1.*"
+    "symfony/yaml": "7.1.*",
+    "ext-cassandra": "*"
   },
   "config": {
     "allow-plugins": {

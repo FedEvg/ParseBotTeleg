@@ -23,12 +23,14 @@ services:
     arguments:
       $token: '%env(API_TOKEN_CONFIG_BOT)%'
       $domain: '%env(URL_PROXY_SERVER_FOR_WEBHOOK)%'
+      $username: '%env(USERNAME_CONFIG_BOT)%'
     tags: [ 'app.telegram.bot' ]
 
   App\Service\Telegram\ParserBot:
     arguments:
       $token: '%env(API_TOKEN_PARSER_BOT)%'
       $domain: '%env(URL_PROXY_SERVER_FOR_WEBHOOK)%'
+      $username: '%env(USERNAME_PARSER_BOT)%'
     tags: [ 'app.telegram.bot' ]
 
   start_command.parser:
@@ -51,6 +53,16 @@ services:
 
   cancel_command.config:
     class: App\Service\Telegram\Command\CancelCommand
+    arguments:
+      $bot: '@App\Service\Telegram\ConfigBot'
+    tags: [ 'telegram.command' ]
+
+  App\Service\Telegram\Command\Channel\CreateChannelForParsing:
+    arguments:
+      $bot: '@App\Service\Telegram\ConfigBot'
+    tags: [ 'telegram.command' ]
+
+  App\Service\Telegram\Command\Channel\CreatePersonalChannel:
     arguments:
       $bot: '@App\Service\Telegram\ConfigBot'
     tags: [ 'telegram.command' ]

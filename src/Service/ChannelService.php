@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\DTO\Telegram\ChannelDTO;
 use App\Entity\Channel;
 use App\Entity\User;
 use App\Repository\ChannelRepository;
@@ -18,39 +19,44 @@ readonly class ChannelService
     }
 
     public function createChannel(
-        object $channel,
+        ChannelDTO $channel,
         bool   $isOwn = false,
         User   $user = null,
     ): Channel
     {
-        $existingChannel = $this->findByTag($channel['username']);
+        $existingChannel = $this->findById($channel->getId());
 
         if ($existingChannel) {
             return $existingChannel;
         }
 
-        $newChannel = (new Channel())
-            ->setChannelTag('@' . $channel['username'])
-            ->setName($channel['title'])
+        $channel = (new Channel())
+            ->setChannelTag('@' . $channel->getUserName())
+            ->setName($channel->getTitle())
             ->setIsOwn($isOwn)
-            ->setChannelId($channel['id'])
+            ->setChannelId($channel->getId())
             ->setCreatedAt(new \DateTime())
             ->setUpdatedAt(new \DateTime());
 
         if ($user) {
-            $user->addChannel($newChannel);
+            $user->addChannel($channel);
             $this->entityManager->persist($user);
         }
 
-        $this->entityManager->persist($newChannel);
+        $this->entityManager->persist($channel);
         $this->entityManager->flush();
 
-        return $newChannel;
+        return $channel;
     }
 
     public function findByTag(string $tag): ?Channel
     {
         return $this->channelRepository->findOneBy(['channel_tag' => $tag]);
+    }
+
+    public function findById(string $id): ?Channel
+    {
+        return $this->channelRepository->findOneBy(['channelId' => $id]);
     }
 
     /**

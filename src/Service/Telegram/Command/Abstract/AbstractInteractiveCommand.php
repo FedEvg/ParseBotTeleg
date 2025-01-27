@@ -10,10 +10,10 @@ use App\Service\Telegram\Command\Interfaces\InteractiveCommandInterface;
 abstract class AbstractInteractiveCommand extends AbstractCommand implements InteractiveCommandInterface
 {
     public function __construct(
-        AbstractBot               $bot,
-        protected readonly string $name,
-        protected readonly string $description,
-        protected readonly string $messageToAction,
+        AbstractBot      $bot,
+        protected string $name,
+        protected string $description,
+        protected string $messageToAction,
     )
     {
         parent::__construct($bot, $name, $description);

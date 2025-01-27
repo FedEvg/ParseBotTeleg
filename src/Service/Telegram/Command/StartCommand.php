@@ -22,6 +22,9 @@ class StartCommand extends AbstractCommand
      */
     public function executeCommand(WebhookDTO $webhook, ?User $user = null): void
     {
-        $this->bot->sendChatMessage($webhook->getChat()->getId(), 'Welcome to the bot! Your username is @.' . $webhook->getChat()->getUserName());
+        $this->bot->sendChatMessage(
+            $webhook->getChat()->getId(),
+            'Welcome to the bot! Your username is @.' . $webhook->getChat()->getUserName()
+        );
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Service\Telegram;
 
 use AllowDynamicProperties;
+use App\DTO\Telegram\ChannelDTO;
 use InvalidArgumentException;
 use Psr\Log\LoggerInterface;
 use Telegram\Bot\Api;
@@ -14,9 +15,15 @@ use Telegram\Bot\Exceptions\TelegramSDKException;
         protected readonly string        $token,
         private readonly string          $domain,
         private readonly LoggerInterface $logger,
+        private readonly string          $username
     )
     {
         parent::__construct($token);
+    }
+
+    public function getUsername(): string
+    {
+        return $this->username;
     }
 
     /**
@@ -81,6 +88,23 @@ use Telegram\Bot\Exceptions\TelegramSDKException;
         if (str_ends_with($className, 'Bot')) {
             $className = substr($className, 0, -3);
         }
+
         return strtolower($className);
+    }
+
+    /**
+     * @throws TelegramSDKException
+     */
+    public function getChannelInfo(string $tag): ChannelDTO
+    {
+        $channel = $this->getChat(['chat_id' => $tag]);
+
+        return (new ChannelDTO())
+            ->setId($channel['id'])
+            ->setTitle($channel['title'])
+            ->setUserName($channel['username'])
+            ->setType($channel['type'])
+            ->setDescription($channel['description'] ?? null)
+            ->setLinkedChatId($channel['linked_chat_id'] ?? null);
     }
 }

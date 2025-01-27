@@ -10,9 +10,9 @@ use App\Service\Telegram\Command\Interfaces\CommandInterface;
 abstract class AbstractCommand implements CommandInterface
 {
     public function __construct(
-        protected AbstractBot     $bot,
-        protected readonly string $name,
-        protected readonly string $description
+        protected AbstractBot $bot,
+        protected string      $name,
+        protected string      $description
     )
     {
     }
